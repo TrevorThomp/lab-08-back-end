@@ -9,7 +9,7 @@ const cors = require('cors');
 const superagent = require('superagent');
 const pg = require('pg');
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 const app = express();
 
 app.use(cors());
@@ -110,6 +110,5 @@ app.use('*', (request, response) => response.send('Sorry, that route does not ex
 
 // PORT to for the server to listen too
 client.connect()
-  .then ( () => {
-    app.listen(PORT, () => console.log(`App is listening on ${PORT}`));
-  });
+
+app.listen(PORT, () => console.log(`App is listening on ${PORT}`));

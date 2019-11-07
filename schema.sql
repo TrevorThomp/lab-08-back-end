@@ -1,5 +1,4 @@
-DROP TABLE IF EXISTS locations;
-DROP TABLE IF EXISTS weather;
+DROP TABLE IF EXISTS locations, weather;
 
 CREATE TABLE locations (
   id SERIAL PRIMARY KEY,
@@ -13,6 +12,7 @@ CREATE TABLE weather (
   id SERIAL PRIMARY KEY,
   forecast VARCHAR(255),
   time VARCHAR(255),
-  location_id INTEGER NOT NULL
+  location_id INTEGER NOT NULL,
+  FOREIGN KEY (location_id) REFERENCES locations (id)
 );
 

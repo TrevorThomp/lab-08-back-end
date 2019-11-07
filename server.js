@@ -20,6 +20,8 @@ app.use(cors());
 // Configure Database
 //-------------------------
 const client = new pg.Client(process.env.DATABASE_URL);
+
+client.connect();
 client.on('error', err => console.error(err));
 
 //-------------------------
@@ -37,30 +39,78 @@ function homePage(request,response) {
 }
 
 //-------------------------
-// Location
+// Constructor Functions
 //-------------------------
-function getLocation (request,response) {
+function Location(city, geoData) {
+  this.search_query = city;
+  this.formatted_query = geoData.results[0].formatted_address;
+  this.latitude = geoData.results[0].geometry.location.lat;
+  this.longitude = geoData.results[0].geometry.location.lng;
+}
+
+function Weather(day) {
+  this.forecast = day.summary;
+  this.time = new Date(day.time * 1000).toDateString();
+}
+
+Weather.tableName = 'weather';
+//-------------------------
+// Static Function
+//-------------------------
+Location.fetchLocation = function(query) {
   const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${request.query.data}&key=${process.env.GEOCODE_API_KEY}`;
 
-  superagent.get(url)
+  return superagent.get(url)
     .then( result => {
-      const geoData = result.body;
-      const location = new Location(request.query.data, geoData);
-      save(location);
-      response.send(location);
-      response.send(result);
-    })
-    .catch( error => {
-      console.error(error);
-      response.status(500).send('Status: 500. Sorry, there is something not quite right');
+      if (!result.body.results.length) throw 'No data';
+      let location = new Location(query, result.body.result[0]);
+      return location.save(
+        .then(result => {
+          location.id = result.rows[0]; //update, delete...etc...
+          return location;
+        })
+      );
     })
 }
 
-function save(location) {
-  let SQL = 'INSERT INTO locations (search_query, formatted_query, latitude, longitude) VALUES($1, $2, $3, $4)';
-  let safeValues = Object.values(location);
+Location.lookup = (handler) => {
+  let SQL = 'SELECT * FROM locations where search_query=$1';
+  const values = [query];
+
+  return client.query(SQL, values)
+    .then( results => {
+      if (results.rowCount > 0) {
+        handler.cacheHit(results);
+      } else {
+        handler.cacheMiss(results);
+      }
+    })
+    .catch(console.error);
+};
+
+//-------------------------
+// Location
+//-------------------------
+Location.prototype.save = function() {
+  let SQL = 'INSERT INTO locations (search_query, formatted_query, latitude, longitude) VALUES($1, $2, $3, $4) RETURNING *';
+  let safeValues = Object.values(this);
   client.query(SQL, safeValues).catch( error => errorHandler(error));
-}
+};
+
+let getLocation = (request, response) => {
+  const locationHandler = {
+    query: request.query.data,
+    cacheHit: results => {
+      response.send(results.rows[0]);
+    },
+    cacheMiss: () => {
+      Location.fetchLocation(request.query.data)
+        .then(data => response.send(data));
+    }
+  };
+
+  Location.lookup(locationHandler);
+};
 
 //-------------------------
 // Weather
@@ -82,32 +132,13 @@ function getWeather (request, response) {
     });
 }
 
-Weather.prototype.save = function (id) {
+Weather.prototype.save = function () {
   let SQL = 'INSERT INTO weather (forecast, time, location_id) VALUES ($1, $2, $3)';
 
   let values = Object.values(this);
 
   client.query(SQL, values);
 }
-
-//-------------------------
-// Constructor Functions
-//-------------------------
-function Weather(day) {
-  this.forecast = day.summary;
-  this.time = new Date(day.time * 1000).toDateString();
-}
-
-Weather.tableName = 'weather';
-
-function Location(city, geoData) {
-  this.search_query = city;
-  this.formatted_query = geoData.results[0].formatted_address;
-  this.latitude = geoData.results[0].geometry.location.lat;
-  this.longitude = geoData.results[0].geometry.location.lng;
-}
-
-Location.tableName = 'locations';
 
 //-------------------------
 // Error Handler
@@ -119,5 +150,4 @@ function errorHandler(error,request,response) {
 // Error if route does not exist
 app.use('*', (request, response) => response.send('Sorry, that route does not exist.'));
 
-client.connect()
 app.listen(PORT, () => console.log(`App is listening on ${PORT}`));

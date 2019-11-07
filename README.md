@@ -51,10 +51,10 @@ Actual time needed to complete: 2 Hours 45 Minutes
 
 Number and name of feature: Deploy
 
-Estimate of time needed to complete: 
+Estimate of time needed to complete: 10 minutes
 
-Start time: 
+Start time: 12:40am
 
-Finish time: 
+Finish time: 12:50am
 
-Actual time needed to complete: 
+Actual time needed to complete: 10 minutes

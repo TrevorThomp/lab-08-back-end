@@ -27,25 +27,25 @@ This application design uses Express, Node.js, jQuery, JavaScript, HTML and CSS.
 
 Number and name of feature: Database
 
-Estimate of time needed to complete: 
+Estimate of time needed to complete: 30 Minutes
 
-Start time: 
+Start time: 8:10AM
 
-Finish time: 
+Finish time: 8:40:AM
 
-Actual time needed to complete: 
+Actual time needed to complete: 30 Minutes
 
 ## Feature #2: Server
 
 Number and name of feature: Server
 
-Estimate of time needed to complete: 
+Estimate of time needed to complete: 1 Hour
 
-Start time: 
+Start time: 9:00AM
 
-Finish time: 
+Finish time: 11:45AM
 
-Actual time needed to complete: 
+Actual time needed to complete: 2 Hours 45 Minutes
 
 ## Feature #3: Deploy
 

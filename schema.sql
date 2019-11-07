@@ -6,10 +6,13 @@ CREATE TABLE locations (
   search_query VARCHAR(255),
   formatted_query VARCHAR(255),
   latitude NUMERIC(10,8),
-  longitude NUMBERIC(11,8)
+  longitude NUMERIC(11,8)
 );
 
 CREATE TABLE weather (
-
+  id SERIAL PRIMARY KEY,
+  forecast VARCHAR(255),
+  time VARCHAR(255),
+  location_id INTEGER NOT NULL
 );
 

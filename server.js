@@ -24,20 +24,6 @@ app.get('/weather', getWeather);
 
 // Helper Function
 
-let lookup = (data) => {
-  let SQL = `SELECT * FROM ${data.tableName} WHERE location_id=$1;`;
-
-  return client.query(SQL, [data.location_id])
-    .then(results => {
-      if (results.rowCount > 0) {
-        data.cacheHit(results);
-      } else {
-        data.cacheMiss();
-      }
-    })
-    .catch(() => errorHandler());
-};
-
 function homePage(request,response) {
   response.status(200).send('Welcome to the Home Page!');
 }
@@ -81,7 +67,7 @@ function getWeather (request, response) {
       });
       response.json(weatherSummaries);
     })
-    .catch( error => {
+    .catch( () => {
       errorHandler('So sorry, something went really wrong', request, response);
     });
 }
@@ -126,5 +112,4 @@ app.use('*', (request, response) => response.send('Sorry, that route does not ex
 client.connect()
   .then ( () => {
     app.listen(PORT, () => console.log(`App is listening on ${PORT}`));
-  })
-
+  });

@@ -9,10 +9,10 @@ CREATE TABLE locations (
   longitude NUMERIC(11,8)
 );
 
--- CREATE TABLE weather (
---   id SERIAL PRIMARY KEY,
---   forecast VARCHAR(255),
---   time VARCHAR(255),
---   location_id INTEGER NOT NULL
--- );
+CREATE TABLE weather (
+  id SERIAL PRIMARY KEY,
+  forecast VARCHAR(255),
+  time VARCHAR(255),
+  location_id INTEGER NOT NULL
+);
 

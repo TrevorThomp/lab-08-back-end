@@ -6,27 +6,43 @@ require('dotenv').config();
 // Application Dependencies
 const express =require('express');
 const cors = require('cors');
-const superagent = require('superagent')
-const pg = require('pg')
+const superagent = require('superagent');
+const pg = require('pg');
 
 const PORT = process.env.PORT;
 const app = express();
 
 app.use(cors());
 
-const client = pg.Client(process.env.DATABASE_URL);
+const client = new pg.Client(process.env.DATABASE_URL);
+
+client.connect();
+
 client.on('error', err => console.error(err));
 
 // Routes
 app.get('/', homePage);
-app.get('/location', handleLocation);
-app.get('/weather', handleWeather);
+app.get('/location', getLocation);
+app.get('/weather', getWeather);
+
+// Helper Function
+
+function lookup(data) {
+  let SQL = `SELECT * FROM ${data.tableName} FROM location_id=$1`;
+
+  client.query(SQL , [data.location_id])
+    .then(results => {
+      results.status(200).json(results);
+    })
+    .catch(error => console.error(error));
+}
 
 function homePage(request,response) {
   response.status(200).send('Welcome to the Home Page!');
 }
 
-function handleLocation(request,response) {
+// Location Methods
+Location.prototype.getLocation(request,response) {
   const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${request.query.data}&key=${process.env.GEOCODE_API_KEY}`;
 
   superagent.get(url)
@@ -40,8 +56,8 @@ function handleLocation(request,response) {
     })
 }
 
-// // Function to handle darksky.json data
-function handleWeather(request, response) {
+// Weather Methods
+Weather.prototype.getWeather(request, response) {
   const url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${request.query.data.latitude},${request.query.data.longitude}`;
 
   superagent.get(url)
@@ -60,13 +76,17 @@ function Weather(day) {
   this.time = new Date(day.time * 1000).toDateString();
 }
 
+Weather.tableName = 'weather';
+
 // Location Constructor Function
 function Location(city, geoData) {
   this.search_query = city;
-  this.formatted_query = geoData.formatted_address;
-  this.latitude = geoData.geometry.location.lat;
-  this.longitude = geoData.geometry.location.lng;
+  this.formatted_query = geoData.results[0].formatted_address;
+  this.latitude = geoData.results[0].geometry.location.lat;
+  this.longitude = geoData.results[0].geometry.location.lng;
 }
+
+Location.tableName = 'locations';
 
 // Error Handler function to throw
 function errorHandler(error,request,response) {

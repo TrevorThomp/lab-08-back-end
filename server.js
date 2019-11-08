@@ -54,6 +54,26 @@ function Weather(day) {
 }
 
 Weather.tableName = 'weather';
+Weather.lookup = lookup;
+
+//-------------------------
+// Lookup Function
+//-------------------------
+function lookup(handler) {
+  let SQL = `SELECT * FROM ${handler.tableName} WHERE location_id=$1`;
+
+  return client.query(SQL, [handler.location_id])
+    .then(results => {
+      if (results.rowCount > 0) {
+        handler.cacheHit(results);
+      } else {
+        handler.cacheMiss(results);
+      }
+    })
+    .catch(console.error)
+}
+
+
 //-------------------------
 // Location Database and API
 //-------------------------

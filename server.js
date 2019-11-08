@@ -54,7 +54,7 @@ function Movies(movie) {
   this.overview = movie.overview;
   this.average_votes = movie.average_votes;
   this.total_votes = movie.total_votes;
-  this.image_url = movie.image_url;
+  this.image_url = `https://image.tmdb.org/t/p/original${movie.poster_path}`;
   this.popularity = movie.popularity;
   this.released_on = movie.released_on;
 }
@@ -154,7 +154,7 @@ Weather.fetch = (query) => {
 Weather.prototype.save = function(location_id) {
   let SQL = `INSERT INTO weather 
     (forecast, timeDay, location_id)
-    VALUES ($1, $2, $3);`;
+    VALUES ($1, $2, $3, $4) RETURNING ID;`;
 
   let values = Object.values(this);
   values.push(location_id);
@@ -183,11 +183,12 @@ let getWeather = (request, response) => {
 // Movies
 //-------------------------
 Movies.fetch = (query) => {
-  const url = `https://api.themoviedb.org/3/movie/now_playing?api_key=${process.env.MOVIE_API_KEY}`;
+  console.log('I MADE IT')
+  const url = `https://api.themoviedb.org/3/movie/now_playing?api_key=${process.env.MOVIE_API_KEY}&language=en-US&page=1`;
 
   return superagent.get(url)
     .then(result => {
-      let movieData = result.body.daily.data.map(day => {
+      let movieData = result.body.results.map(day => {
         let movie = new Movies(day);
         movie.save(query.id);
         return movie;
@@ -199,8 +200,8 @@ Movies.fetch = (query) => {
 
 Movies.prototype.save = function(location_id) {
   let SQL = `INSERT INTO movies
-    (forecast, timeDay, location_id)
-    VALUES ($1, $2, $3);`;
+    (title, overview, average_votes, total_votes, image_url, popularity, released_on, location_id)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);`;
 
   let values = Object.values(this);
   values.push(location_id);
@@ -216,7 +217,7 @@ let getMovies = (request, response) => {
       response.send(result.rows);
     },
     cacheMiss: () => {
-      Weather.fetch(request.query.data)
+      Movies.fetch(request.query.data)
         .then((results) => response.send(results))
         .catch(() => errorMessage());
     }

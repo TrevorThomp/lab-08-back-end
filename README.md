@@ -31,9 +31,9 @@ Estimate of time needed to complete: 30 Minutes
 
 Start time: 9:30am
 
-Finish time: 
+Finish time: 10:35am
 
-Actual time needed to complete: 
+Actual time needed to complete: 1 hour 5 minutes
 
 ## Feature #2: Yelp
 

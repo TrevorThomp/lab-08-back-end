@@ -19,42 +19,43 @@ This application design uses Express, Node.js, jQuery, JavaScript, HTML and CSS.
 
 ## Change Log
 
+11-08-2019 10:35am - Application now accurately shows movies in the area that the user inputs.
 
 ## Credits and Collaborations
-  Natalie Alway
+  Travis Skyles
 
-## Feature #1: Database
+## Feature #1: Movies
 
-Number and name of feature: Database
+Number and name of feature: Movies
 
 Estimate of time needed to complete: 30 Minutes
 
-Start time: 8:10AM
+Start time: 9:30am
 
-Finish time: 8:40:AM
+Finish time: 10:35am
 
-Actual time needed to complete: 30 Minutes
+Actual time needed to complete: 1 hour 5 minutes
 
-## Feature #2: Server
+## Feature #2: Yelp
 
-Number and name of feature: Server
+Number and name of feature: Yelp
 
-Estimate of time needed to complete: 1 Hour
+Estimate of time needed to complete:
 
-Start time: 9:00AM
+Start time: 
 
-Finish time: 11:45AM
+Finish time: 
 
-Actual time needed to complete: 2 Hours 45 Minutes
+Actual time needed to complete: 
 
-## Feature #3: Deploy
+## Feature #3: Modularize
 
-Number and name of feature: Deploy
+Number and name of feature: Modularize
 
-Estimate of time needed to complete: 10 minutes
+Estimate of time needed to complete: 
 
-Start time: 12:40am
+Start time: 
 
-Finish time: 12:50am
+Finish time: 
 
-Actual time needed to complete: 10 minutes
+Actual time needed to complete: 

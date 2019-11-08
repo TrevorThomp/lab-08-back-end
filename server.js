@@ -49,6 +49,19 @@ function Weather(day) {
 Weather.tableName = 'weather';
 Weather.lookup = lookup;
 
+function Movies(movie) {
+  this.title = movie.title;
+  this.overview = movie.overview;
+  this.average_votes = movie.average_votes;
+  this.total_votes = movie.total_votes;
+  this.image_url = `https://image.tmdb.org/t/p/original${movie.poster_path}`;
+  this.popularity = movie.popularity;
+  this.released_on = movie.released_on;
+}
+
+Movies.tableName = 'movies';
+Movies.lookup = lookup;
+
 //-------------------------
 // Lookup Function
 //-------------------------
@@ -141,7 +154,7 @@ Weather.fetch = (query) => {
 Weather.prototype.save = function(location_id) {
   let SQL = `INSERT INTO weather 
     (forecast, timeDay, location_id)
-    VALUES ($1, $2, $3);`;
+    VALUES ($1, $2, $3, $4) RETURNING ID;`;
 
   let values = Object.values(this);
   values.push(location_id);
@@ -167,11 +180,59 @@ let getWeather = (request, response) => {
 };
 
 //-------------------------
+// Movies
+//-------------------------
+Movies.fetch = (query) => {
+  console.log('I MADE IT')
+  const url = `https://api.themoviedb.org/3/movie/now_playing?api_key=${process.env.MOVIE_API_KEY}&language=en-US&page=1`;
+
+  return superagent.get(url)
+    .then(result => {
+      let movieData = result.body.results.map(day => {
+        let movie = new Movies(day);
+        movie.save(query.id);
+        return movie;
+      });
+      return movieData;
+    })
+    .catch(() => errorMessage());
+};
+
+Movies.prototype.save = function(location_id) {
+  let SQL = `INSERT INTO movies
+    (title, overview, average_votes, total_votes, image_url, popularity, released_on, location_id)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);`;
+
+  let values = Object.values(this);
+  values.push(location_id);
+
+  return client.query(SQL, values);
+};
+
+let getMovies = (request, response) => {
+  const movieHandler = {
+    location_id: request.query.data.id,
+    tableName: Movies.tableName,
+    cacheHit: (result) => {
+      response.send(result.rows);
+    },
+    cacheMiss: () => {
+      Movies.fetch(request.query.data)
+        .then((results) => response.send(results))
+        .catch(() => errorMessage());
+    }
+  };
+
+  Movies.lookup(movieHandler);
+};
+
+//-------------------------
 // Routes
 //-------------------------
 app.get('/', homePage);
 app.get('/location', getLocation);
 app.get('/weather', getWeather);
+app.get('/movies', getMovies);
 
 //-------------------------
 // Error Handler

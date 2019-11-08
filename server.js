@@ -25,13 +25,6 @@ client.connect();
 client.on('error', err => console.error(err));
 
 //-------------------------
-// Routes
-//-------------------------
-app.get('/', homePage);
-app.get('/location', getLocation);
-app.get('/weather', getWeather);
-
-//-------------------------
 // Home Page
 //-------------------------
 function homePage(request,response) {
@@ -43,9 +36,9 @@ function homePage(request,response) {
 //-------------------------
 function Location(city, geoData) {
   this.search_query = city;
-  this.formatted_query = geoData.results[0].formatted_address;
-  this.latitude = geoData.results[0].geometry.location.lat;
-  this.longitude = geoData.results[0].geometry.location.lng;
+  this.formatted_query = geoData.formatted_address;
+  this.latitude = geoData.geometry.location.lat;
+  this.longitude = geoData.geometry.location.lng;
 }
 
 function Weather(day) {
@@ -60,127 +53,137 @@ Weather.lookup = lookup;
 // Lookup Function
 //-------------------------
 function lookup(handler) {
-  let SQL = `SELECT * FROM ${handler.tableName} WHERE location_id=$1`;
+  let SQL = `SELECT * FROM ${handler.tableName} WHERE location_id=$1;`;
 
   return client.query(SQL, [handler.location_id])
     .then(results => {
       if (results.rowCount > 0) {
         handler.cacheHit(results);
       } else {
-        handler.cacheMiss(results);
+        handler.cacheMiss();
       }
     })
-    .catch(console.error)
+    .catch(() => errorMessage());
 }
-
 
 //-------------------------
 // Location Database and API
 //-------------------------
-Location.fetchLocation = function(query) {
+Location.fetchLocation = function (query){
   const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${query}&key=${process.env.GEOCODE_API_KEY}`;
-
   return superagent.get(url)
-    .then(result => {
-      if (!result.body.results.length) throw 'no data';
+    .then( result=> {
+      if(!result.body.results.length) {throw 'No data';}
       let location = new Location(query, result.body.results[0]);
       return location.save()
-        .then(result => {
+        .then( result => {
           location.id = result.rows[0].id;
           return location;
         });
-
-    })
-    .catch(() => errorHandler());
+    });
 };
 
-Location.lookup = handler => {
-  const SQL = `SELECT * FROM locations WHERE search_query=$1;`;
+Location.lookup = (handler) => {
+  const SQL = 'SELECT * FROM locations WHERE search_query=$1';
   const values = [handler.query];
-
   return client.query(SQL, values)
-    .then(results => {
-      if (results.rowCount > 0) {
+    .then( results => {
+      if (results.rowCount > 0){
         handler.cacheHit(results);
-      } else {
-        handler.cacheMiss(results);
+      }else {
+        handler.cacheMiss();
       }
     })
     .catch(console.error);
 };
 
-Location.prototype.save = function() {
-  let SQL = 'INSERT INTO locations (search_query, formatted_query, latitude, longitude) VALUES($1, $2, $3, $4) RETURNING *';
-  let safeValues = Object.values(this);
-  client.query(SQL, safeValues).catch( error => errorHandler(error));
+Location.prototype.save = function(){
+  const SQL = `INSERT INTO locations
+  (search_query, formatted_query, latitude, longitude)
+  VALUES ($1, $2, $3, $4)
+  RETURNING *`;
+  let values = Object.values(this);
+  return client.query(SQL, values);
 };
 
-function getLocation (request, response) {
+function getLocation(request,response) {
   const locationHandler = {
     query: request.query.data,
-    cacheHit: result => {
+    cacheHit: (result) => {
       response.send(result.rows[0]);
     },
     cacheMiss: () => {
       Location.fetchLocation(request.query.data)
-        .then(result => response.send(result));
+        .then( data => response.send(data));
     }
   };
-
   Location.lookup(locationHandler);
-}
+ }
 
 //-------------------------
 // Weather
 //-------------------------
-Weather.fetchWeather = (query) => {
+Weather.fetch = (query) => {
   const url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${query.latitude},${query.longitude}`;
 
-  superagent.get(url)
-    .then( data => {
-      const weatherSummaries = data.body.daily.data.map(day => {
-        const weatherDay = new Weather(day);
-        weatherDay.save(query.data.id);
-        return weatherDay
+  return superagent.get(url)
+    .then(result => {
+      let weatherData = result.body.daily.data.map(day => {
+        let weather = new Weather(day);
+        weather.save(query.id);
+        return weather;
       });
-      return weatherSummaries;
+      return weatherData;
     })
-    .catch( () => {
-      errorHandler();
-    });
-}
+    .catch(() => errorMessage());
+};
 
-Weather.prototype.save = function (location_id) {
-  let SQL = 'INSERT INTO weather (forecast, time, location_id) VALUES ($1, $2, $3)';
+Weather.prototype.save = function(location_id) {
+  let SQL = `INSERT INTO weather 
+    (forecast, timeDay, location_id)
+    VALUES ($1, $2, $3);`;
 
   let values = Object.values(this);
   values.push(location_id);
 
-  client.query(SQL, values);
-}
+  return client.query(SQL, values);
+};
 
-function getWeather(request,response) {
+let getWeather = (request, response) => {
   const weatherHandler = {
     location_id: request.query.data.id,
     tableName: Weather.tableName,
-    cacheHit: result => {
-      response.send(result.rows[0]);
+    cacheHit: (result) => {
+      response.send(result.rows);
     },
     cacheMiss: () => {
-      Weather.fetchWeather(request.query.data)
-        .then(result => response.send(result))
+      Weather.fetch(request.query.data)
+        .then((results) => response.send(results))
+        .catch(() => errorMessage());
     }
-  }
+  };
 
   Weather.lookup(weatherHandler);
-}
+};
+
+//-------------------------
+// Routes
+//-------------------------
+app.get('/', homePage);
+app.get('/location', getLocation);
+app.get('/weather', getWeather);
 
 //-------------------------
 // Error Handler
 //-------------------------
-function errorHandler(error,request,response) {
-  response.status(500).send(error);
-}
+let errorMessage = () => {
+  let errorObj = {
+    status: 500,
+    responseText: 'Sorry something went wrong',
+  };
+  return errorObj;
+};
+
 
 // Error if route does not exist
 app.use('*', (request, response) => response.send('Sorry, that route does not exist.'));

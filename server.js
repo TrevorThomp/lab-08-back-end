@@ -62,6 +62,14 @@ function Movies(movie) {
 Movies.tableName = 'movies';
 Movies.lookup = lookup;
 
+function Yelp(camp) {
+  this.name = camp.name;
+  this.image_url = camp.image_url;
+  this.price = camp.price;
+  this.rating = camp.rating;
+  this.url = camp.url;
+}
+
 //-------------------------
 // Lookup Function
 //-------------------------
@@ -222,7 +230,52 @@ let getMovies = (request, response) => {
         .catch(() => errorMessage());
     }
   };
+  Movies.lookup(movieHandler);
+};
 
+//-------------------------
+// Movies
+//-------------------------
+Movies.fetch = (query) => {
+  console.log('I MADE IT')
+  const url = `https://api.themoviedb.org/3/movie/now_playing?api_key=${process.env.MOVIE_API_KEY}&language=en-US&page=1`;
+
+  return superagent.get(url)
+    .then(result => {
+      let movieData = result.body.results.map(day => {
+        let movie = new Movies(day);
+        movie.save(query.id);
+        return movie;
+      });
+      return movieData;
+    })
+    .catch(() => errorMessage());
+};
+
+Movies.prototype.save = function(location_id) {
+  let SQL = `INSERT INTO movies
+    (title, overview, average_votes, total_votes, image_url, popularity, released_on, location_id)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);`;
+
+  let values = Object.values(this);
+  values.push(location_id);
+
+  return client.query(SQL, values);
+};
+
+let getMovies = (request, response) => {
+  const movieHandler = {
+    location_id: request.query.data.id,
+    tableName: Movies.tableName,
+    cacheHit: (result) => {
+      response.send(result.rows);
+    },
+    cacheMiss: () => {
+      Movies.fetch(request.query.data)
+        .then((results) => response.send(results))
+        .catch(() => errorMessage());
+    }
+  };
   Movies.lookup(movieHandler);
 };
 

@@ -54,6 +54,26 @@ function Weather(day) {
 }
 
 Weather.tableName = 'weather';
+Weather.lookup = lookup;
+
+//-------------------------
+// Lookup Function
+//-------------------------
+function lookup(handler) {
+  let SQL = `SELECT * FROM ${handler.tableName} WHERE location_id=$1`;
+
+  return client.query(SQL, [handler.location_id])
+    .then(results => {
+      if (results.rowCount > 0) {
+        handler.cacheHit(results);
+      } else {
+        handler.cacheMiss(results);
+      }
+    })
+    .catch(console.error)
+}
+
+
 //-------------------------
 // Location Database and API
 //-------------------------
@@ -108,25 +128,25 @@ function getLocation (request, response) {
   };
 
   Location.lookup(locationHandler);
-};
+}
 
 //-------------------------
 // Weather
 //-------------------------
-function getWeather (request, response) {
-  const url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${request.query.data.latitude},${request.query.data.longitude}`;
+Weather.fetchWeather = (query) => {
+  const url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${query.latitude},${query.longitude}`;
 
   superagent.get(url)
     .then( data => {
       const weatherSummaries = data.body.daily.data.map(day => {
         const weatherDay = new Weather(day);
-        weatherDay.save(request.query.data.id);
+        weatherDay.save(query.data.id);
         return weatherDay
       });
-      response.json(weatherSummaries);
+      return weatherSummaries;
     })
     .catch( () => {
-      errorHandler('So sorry, something went really wrong', request, response);
+      errorHandler();
     });
 }
 
@@ -137,6 +157,22 @@ Weather.prototype.save = function (location_id) {
   values.push(location_id);
 
   client.query(SQL, values);
+}
+
+function getWeather(request,response) {
+  const weatherHandler = {
+    location_id: request.query.data.id,
+    tableName: Weather.tableName,
+    cacheHit: result => {
+      response.send(result.rows[0]);
+    },
+    cacheMiss: () => {
+      Weather.fetchWeather(request.query.data)
+        .then(result => response.send(result))
+    }
+  }
+
+  Weather.lookup(weatherHandler);
 }
 
 //-------------------------

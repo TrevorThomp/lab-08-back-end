@@ -19,6 +19,7 @@ This application design uses Express, Node.js, jQuery, JavaScript, HTML and CSS.
 
 ## Change Log
 
+11-08-2019 10:35am - Application now accurately shows movies in the area that the user inputs.
 
 ## Credits and Collaborations
   Travis Skyles

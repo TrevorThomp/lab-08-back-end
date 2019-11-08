@@ -55,30 +55,31 @@ function Weather(day) {
 
 Weather.tableName = 'weather';
 //-------------------------
-// Static Function
+// Location Database and API
 //-------------------------
 Location.fetchLocation = function(query) {
-  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${request.query.data}&key=${process.env.GEOCODE_API_KEY}`;
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${query}&key=${process.env.GEOCODE_API_KEY}`;
 
   return superagent.get(url)
-    .then( result => {
-      if (!result.body.results.length) throw 'No data';
-      let location = new Location(query, result.body.result[0]);
-      return location.save(
+    .then(result => {
+      if (!result.body.results.length) throw 'no data';
+      let location = new Location(query, result.body.results[0]);
+      return location.save()
         .then(result => {
-          location.id = result.rows[0]; //update, delete...etc...
+          location.id = result.rows[0].id;
           return location;
-        })
-      );
-    })
-}
+        });
 
-Location.lookup = (handler) => {
-  let SQL = 'SELECT * FROM locations where search_query=$1';
-  const values = [query];
+    })
+    .catch(() => errorHandler());
+};
+
+Location.lookup = handler => {
+  const SQL = `SELECT * FROM locations WHERE search_query=$1;`;
+  const values = [handler.query];
 
   return client.query(SQL, values)
-    .then( results => {
+    .then(results => {
       if (results.rowCount > 0) {
         handler.cacheHit(results);
       } else {
@@ -88,9 +89,6 @@ Location.lookup = (handler) => {
     .catch(console.error);
 };
 
-//-------------------------
-// Location
-//-------------------------
 Location.prototype.save = function() {
   let SQL = 'INSERT INTO locations (search_query, formatted_query, latitude, longitude) VALUES($1, $2, $3, $4) RETURNING *';
   let safeValues = Object.values(this);
@@ -100,12 +98,12 @@ Location.prototype.save = function() {
 let getLocation = (request, response) => {
   const locationHandler = {
     query: request.query.data,
-    cacheHit: results => {
-      response.send(results.rows[0]);
+    cacheHit: result => {
+      response.send(result.rows[0]);
     },
     cacheMiss: () => {
       Location.fetchLocation(request.query.data)
-        .then(data => response.send(data));
+        .then(result => response.send(result));
     }
   };
 

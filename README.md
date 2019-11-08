@@ -1,7 +1,7 @@
 # Project Name
 
 **Author**: Trevor Thompson
-**Version**: 3.0.0 (increment the patch/fix version number if you make more commits past your first submission)
+**Version**: 4.0.0 (increment the patch/fix version number if you make more commits past your first submission)
 
 ## Overview
 
@@ -40,9 +40,9 @@ Actual time needed to complete: 1 hour 5 minutes
 
 Number and name of feature: Yelp
 
-Estimate of time needed to complete:
+Estimate of time needed to complete: 60 minutes
 
-Start time: 
+Start time: 10:40am
 
 Finish time: 
 

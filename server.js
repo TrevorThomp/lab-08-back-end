@@ -180,6 +180,52 @@ let getWeather = (request, response) => {
 };
 
 //-------------------------
+// Movies
+//-------------------------
+Movies.fetch = (query) => {
+  const url = `https://api.themoviedb.org/3/movie/now_playing?api_key=${process.env.MOVIE_API_KEY}`;
+
+  return superagent.get(url)
+    .then(result => {
+      let movieData = result.body.daily.data.map(day => {
+        let movie = new Movies(day);
+        movie.save(query.id);
+        return movie;
+      });
+      return movieData;
+    })
+    .catch(() => errorMessage());
+};
+
+Movies.prototype.save = function(location_id) {
+  let SQL = `INSERT INTO movies
+    (forecast, timeDay, location_id)
+    VALUES ($1, $2, $3);`;
+
+  let values = Object.values(this);
+  values.push(location_id);
+
+  return client.query(SQL, values);
+};
+
+let getMovies = (request, response) => {
+  const movieHandler = {
+    location_id: request.query.data.id,
+    tableName: Movies.tableName,
+    cacheHit: (result) => {
+      response.send(result.rows);
+    },
+    cacheMiss: () => {
+      Weather.fetch(request.query.data)
+        .then((results) => response.send(results))
+        .catch(() => errorMessage());
+    }
+  };
+
+  Movies.lookup(movieHandler);
+};
+
+//-------------------------
 // Routes
 //-------------------------
 app.get('/', homePage);

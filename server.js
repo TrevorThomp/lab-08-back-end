@@ -70,6 +70,9 @@ function Yelp(camp) {
   this.url = camp.url;
 }
 
+Yelp.tableName = 'yelp';
+Yelp.lookup = lookup;
+
 //-------------------------
 // Lookup Function
 //-------------------------
@@ -139,7 +142,7 @@ function getLocation(request,response) {
     }
   };
   Location.lookup(locationHandler);
- }
+}
 
 //-------------------------
 // Weather
@@ -234,28 +237,28 @@ let getMovies = (request, response) => {
 };
 
 //-------------------------
-// Movies
+// Yelp
 //-------------------------
-Movies.fetch = (query) => {
+Yelp.fetch = (query) => {
   console.log('I MADE IT')
   const url = `https://api.themoviedb.org/3/movie/now_playing?api_key=${process.env.MOVIE_API_KEY}&language=en-US&page=1`;
 
   return superagent.get(url)
     .then(result => {
-      let movieData = result.body.results.map(day => {
-        let movie = new Movies(day);
-        movie.save(query.id);
-        return movie;
+      let yelpData = result.body.results.map(day => {
+        let yelp = new Yelp(day);
+        yelp.save(query.id);
+        return yelp;
       });
-      return movieData;
+      return yelpData;
     })
     .catch(() => errorMessage());
 };
 
-Movies.prototype.save = function(location_id) {
+Yelp.prototype.save = function(location_id) {
   let SQL = `INSERT INTO movies
-    (title, overview, average_votes, total_votes, image_url, popularity, released_on, location_id)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);`;
+    (yelpName, image_url, price, rating, url, location_id)
+    VALUES ($1, $2, $3, $4, $5, $6, $7);`;
 
   let values = Object.values(this);
   values.push(location_id);
@@ -263,20 +266,20 @@ Movies.prototype.save = function(location_id) {
   return client.query(SQL, values);
 };
 
-let getMovies = (request, response) => {
-  const movieHandler = {
+let getYelp = (request, response) => {
+  const yelpHandler = {
     location_id: request.query.data.id,
-    tableName: Movies.tableName,
+    tableName: Yelp.tableName,
     cacheHit: (result) => {
       response.send(result.rows);
     },
     cacheMiss: () => {
-      Movies.fetch(request.query.data)
+      Yelp.fetch(request.query.data)
         .then((results) => response.send(results))
         .catch(() => errorMessage());
     }
   };
-  Movies.lookup(movieHandler);
+  Yelp.lookup(yelpHandler);
 };
 
 //-------------------------
@@ -286,6 +289,7 @@ app.get('/', homePage);
 app.get('/location', getLocation);
 app.get('/weather', getWeather);
 app.get('/movies', getMovies);
+app.get('/yelp', getYelp);
 
 //-------------------------
 // Error Handler

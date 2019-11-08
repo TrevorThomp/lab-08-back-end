@@ -185,6 +185,7 @@ let getWeather = (request, response) => {
 app.get('/', homePage);
 app.get('/location', getLocation);
 app.get('/weather', getWeather);
+app.get('/movies', getMovies);
 
 //-------------------------
 // Error Handler

@@ -49,6 +49,19 @@ function Weather(day) {
 Weather.tableName = 'weather';
 Weather.lookup = lookup;
 
+function Movies(movie) {
+  this.title = movie.title;
+  this.overview = movie.overview;
+  this.average_votes = movie.average_votes;
+  this.total_votes = movie.total_votes;
+  this.image_url = movie.image_url;
+  this.popularity = movie.popularity;
+  this.released_on = movie.released_on;
+}
+
+Movies.tableName = 'movies';
+Movies.lookup = lookup;
+
 //-------------------------
 // Lookup Function
 //-------------------------

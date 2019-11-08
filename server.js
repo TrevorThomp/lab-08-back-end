@@ -95,7 +95,7 @@ Location.prototype.save = function() {
   client.query(SQL, safeValues).catch( error => errorHandler(error));
 };
 
-let getLocation = (request, response) => {
+function getLocation (request, response) {
   const locationHandler = {
     query: request.query.data,
     cacheHit: result => {
@@ -120,20 +120,21 @@ function getWeather (request, response) {
     .then( data => {
       const weatherSummaries = data.body.daily.data.map(day => {
         const weatherDay = new Weather(day);
-        Weather.save(weatherDay);
-        response.send(weatherSummaries);
-        response.send(data);
+        weatherDay.save(request.query.data.id);
+        return weatherDay
       });
+      response.json(weatherSummaries);
     })
     .catch( () => {
       errorHandler('So sorry, something went really wrong', request, response);
     });
 }
 
-Weather.prototype.save = function () {
+Weather.prototype.save = function (location_id) {
   let SQL = 'INSERT INTO weather (forecast, time, location_id) VALUES ($1, $2, $3)';
 
   let values = Object.values(this);
+  values.push(location_id);
 
   client.query(SQL, values);
 }

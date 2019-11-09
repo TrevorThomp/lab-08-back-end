@@ -58,6 +58,18 @@ Estimate of time needed to complete: 30 minutes
 
 Start time: 10:35am
 
-Finish time: 
+Finish time: 10:50am
 
-Actual time needed to complete: 
+Actual time needed to complete: 15 minutes
+
+## Feature #3: Trail API
+
+Number and name of feature: Trail API
+
+Estimate of time needed to complete: 30 minutes
+
+Start time: 12:00pm
+
+Finish time: 1:15pm
+
+Actual time needed to complete: 1 hour 15 minutes

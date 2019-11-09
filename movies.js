@@ -7,7 +7,6 @@ function getMovies(request,response) {
 
   return superagent.get(url)
     .then(result => {
-      console.log(result)
       const movieData = result.body.results.map(day => {
         return new Movies(day);
       });

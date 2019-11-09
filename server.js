@@ -11,6 +11,7 @@ const pg = require('pg');
 
 const getWeather = require('./weather.js');
 const getMovies = require('./movies.js');
+const getYelp = require('./yelp.js');
 const PORT = process.env.PORT || 3000;
 const app = express();
 app.use(cors());
@@ -34,14 +35,6 @@ function Location(query, data){
   this.formatted_query = data.formatted_address;
   this.latitude = data.geometry.location.lat;
   this.longitude = data.geometry.location.lng;
-}
-
-function Yelp(data) {
-  this.name = data.name;
-  this.rating = data.rating;
-  this.price = data.price;
-  this.url = data.url;
-  this.image_url = data.image_url;
 }
 
 //Static Constructor Functions
@@ -104,21 +97,6 @@ function getLocation(request,response) {
     }
   };
   Location.lookup(locationHandler);
-}
-
-function getYelp(request,response) {
-  const url = `https://api.yelp.com/v3/businesses/search?latitude=${request.query.data.latitude}&longitude=${request.query.data.longitude}`;
-
-  return superagent
-    .get(url)
-    .set('Authorization', `Bearer ${process.env.YELP_API_KEY}`)
-    .then(result => {
-      const yelpData = result.body.businesses.map(data => {
-        return new Yelp(data);
-      })
-      response.status(200).json(yelpData);
-    })
-    .catch(() => errorHandler('So sorry, something went wrong', request, response));
 }
 
 // API Routes

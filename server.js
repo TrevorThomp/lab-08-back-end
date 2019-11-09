@@ -10,7 +10,6 @@ const pg = require('pg');
 app.use(cors());
 
 const client = new pg.Client(process.env.DATABASE_URL);
-client.connect();
 client.on('err', err => console.error(err));
 
 // Access to API modules
@@ -49,4 +48,9 @@ app.use('*', notFoundHandler);
 app.use(errorHandler);
 
 // Make sure the server is listening for requests
-app.listen(PORT, () => console.log(`app is listening ${PORT}`));
+client.connect()
+  .then( () => {
+    app.listen(PORT, ()=> {
+      console.log('server and db are up, listening on port ', PORT);
+    });
+  });

@@ -47,8 +47,15 @@ function Movies(movie) {
   this.released_on = movie.release_date;
 }
 
-//My Static Constructor Functions
+function Yelp(data) {
+  this.name = data.name;
+  this.rating = data.rating;
+  this.price = data.price;
+  this.url = data.url;
+  this.image_url = data.image_url;
+}
 
+//Static Constructor Functions
 Location.fetchLocation = function (query){
   const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${query}&key=${process.env.GEOCODE_API_KEY}`;
 
@@ -111,9 +118,10 @@ function getLocation(request,response) {
 }
 
 function getWeather(request, response) {
-
   const url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${request.query.data.latitude},${request.query.data.longitude}`;
-  superagent.get(url)
+
+  return superagent
+    .get(url)
     .then( data => {
       const weatherSummaries = data.body.daily.data.map(day => {
         return new Weather(day);
@@ -123,7 +131,6 @@ function getWeather(request, response) {
     .catch( ()=> {
       errorHandler('So sorry, something went really wrong', request, response);
     });
-
 }
 
 function getMovies(request,response) {
@@ -139,10 +146,26 @@ function getMovies(request,response) {
     .catch(() => errorHandler('So sorry, something went wrong', request, response));
 }
 
+function getYelp(request,response) {
+  const url = `https://api.yelp.com/v3/businesses/search?location=${request.search_query}`;
+
+  return superagent
+    .get(url)
+    .set('Authorization', `Bearer ${process.env.YELP_API_KEY}`)
+    .then(result => {
+      const yelpData = result.body.businesses.map(data => {
+        return new Yelp(data);
+      })
+      response.status(200).json(yelpData);
+    })
+    .catch(() => errorHandler('So sorry, something went wrong', request, response));
+}
+
 // API Routes
 app.get('/location', getLocation);
 app.get('/weather', getWeather);
 app.get('/movies', getMovies);
+app.get('/yelp', getYelp);
 
 
 app.use('*', notFoundHandler);

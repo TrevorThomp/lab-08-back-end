@@ -17,15 +17,20 @@ const getLocation = require('./location.js');
 // PORT
 const PORT = process.env.PORT || 3000;
 
+function getHome(request,response) {
+  response.status(200).send('Welcome to the Home Page')
+}
+
 //Errors
 function notFoundHandler(request,response) {
-  response.status(404).send('huh?');
+  response.status(404).send('');
 }
 function errorHandler(error,request,response) {
   response.status(500).send(error);
 }
 
 // API Routes
+app.get('/', getHome);
 app.get('/location', getLocation);
 app.get('/weather', getWeather);
 app.get('/movies', getMovies);

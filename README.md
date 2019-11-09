@@ -1,7 +1,7 @@
 # Project Name
 
 **Author**: Trevor Thompson
-**Version**: 3.0.0 (increment the patch/fix version number if you make more commits past your first submission)
+**Version**: 4.0.0 (increment the patch/fix version number if you make more commits past your first submission)
 
 ## Overview
 
@@ -20,6 +20,8 @@ This application design uses Express, Node.js, jQuery, JavaScript, HTML and CSS.
 ## Change Log
 
 11-08-2019 10:35am - Application now accurately shows movies in the area that the user inputs.
+
+11-08-2019 4:35pm - Application now accurately displays yelp information based on location entered.
 
 ## Credits and Collaborations
   Travis Skyles
@@ -40,13 +42,13 @@ Actual time needed to complete: 1 hour 5 minutes
 
 Number and name of feature: Yelp
 
-Estimate of time needed to complete:
+Estimate of time needed to complete: 60 minutes
 
-Start time: 
+Start time: 10:40am
 
-Finish time: 
+Finish time: 4:00pm 
 
-Actual time needed to complete: 
+Actual time needed to complete: 6 hours
 
 ## Feature #3: Modularize
 

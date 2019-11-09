@@ -49,8 +49,7 @@ app.use(errorHandler);
 
 // Make sure the server is listening for requests
 client.connect()
-  .then( () => {
-    app.listen(PORT, ()=> {
-      console.log('server and db are up, listening on port ', PORT);
-    });
-  });
+
+app.listen(PORT, ()=> {
+  console.log('server and db are up, listening on port ', PORT);
+});

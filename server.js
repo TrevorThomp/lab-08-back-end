@@ -35,11 +35,6 @@ function Location(query, data){
   this.longitude = data.geometry.location.lng;
 }
 
-// function Weather(day) {
-//   this.forecast = day.summary;
-//   this.time = new Date(day.time * 1000).toDateString();
-// }
-
 function Movies(movie) {
   this.title = movie.title;
   this.overview = movie.overview;
@@ -120,22 +115,6 @@ function getLocation(request,response) {
   Location.lookup(locationHandler);
 }
 
-// function getWeather(request, response) {
-//   const url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${request.query.data.latitude},${request.query.data.longitude}`;
-
-//   return superagent
-//     .get(url)
-//     .then( data => {
-//       const weatherSummaries = data.body.daily.data.map(day => {
-//         return new Weather(day);
-//       });
-//       response.status(200).json(weatherSummaries);
-//     })
-//     .catch( ()=> {
-//       errorHandler('So sorry, something went really wrong', request, response);
-//     });
-// }
-
 function getMovies(request,response) {
   const url = `https://api.themoviedb.org/3/movie/now_playing?api_key=${process.env.MOVIE_API_KEY}&language=en-US&page=1`;
 
@@ -151,7 +130,7 @@ function getMovies(request,response) {
 }
 
 function getYelp(request,response) {
-  const url = `https://api.yelp.com/v3/businesses/search?location=${request.search_query}`;
+  const url = `https://api.yelp.com/v3/businesses/search?latitude=${request.query.data.latitude}&longitude=${request.query.data.longitude}`;
 
   return superagent
     .get(url)

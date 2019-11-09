@@ -10,6 +10,7 @@ const pg = require('pg');
 
 
 const weather = require('./weather.js');
+const getMovies = require('./movies.js');
 const PORT = process.env.PORT || 3000;
 const app = express();
 app.use(cors());
@@ -35,15 +36,15 @@ function Location(query, data){
   this.longitude = data.geometry.location.lng;
 }
 
-function Movies(movie) {
-  this.title = movie.title;
-  this.overview = movie.overview;
-  this.average_votes = movie.vote_average;
-  this.total_votes = movie.vote_count;
-  this.image_url = `https://image.tmdb.org/t/p/w500/${movie.poster_path}`;
-  this.popularity = movie.popularity;
-  this.released_on = movie.release_date;
-}
+// function Movies(movie) {
+//   this.title = movie.title;
+//   this.overview = movie.overview;
+//   this.average_votes = movie.vote_average;
+//   this.total_votes = movie.vote_count;
+//   this.image_url = `https://image.tmdb.org/t/p/w500/${movie.poster_path}`;
+//   this.popularity = movie.popularity;
+//   this.released_on = movie.release_date;
+// }
 
 function Yelp(data) {
   this.name = data.name;
@@ -115,19 +116,19 @@ function getLocation(request,response) {
   Location.lookup(locationHandler);
 }
 
-function getMovies(request,response) {
-  const url = `https://api.themoviedb.org/3/movie/now_playing?api_key=${process.env.MOVIE_API_KEY}&language=en-US&page=1`;
+// function getMovies(request,response) {
+//   const url = `https://api.themoviedb.org/3/movie/now_playing?api_key=${process.env.MOVIE_API_KEY}&language=en-US&page=1`;
 
-  return superagent.get(url)
-    .then(result => {
-      console.log(result)
-      const movieData = result.body.results.map(day => {
-        return new Movies(day);
-      });
-      response.status(200).json(movieData)
-    })
-    .catch(() => errorHandler('So sorry, something went wrong', request, response));
-}
+//   return superagent.get(url)
+//     .then(result => {
+//       console.log(result)
+//       const movieData = result.body.results.map(day => {
+//         return new Movies(day);
+//       });
+//       response.status(200).json(movieData)
+//     })
+//     .catch(() => errorHandler('So sorry, something went wrong', request, response));
+// }
 
 function getYelp(request,response) {
   const url = `https://api.yelp.com/v3/businesses/search?latitude=${request.query.data.latitude}&longitude=${request.query.data.longitude}`;

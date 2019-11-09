@@ -25,7 +25,7 @@ function getMovies(request,response) {
       });
       response.status(200).json(movieData)
     })
-    .catch(() => errorHandler('So sorry, something went wrong', request, response));
+    .catch(() => response.status(500).send('So sorry, something went really wrong', request, response));
 }
 
 // Export MovieDB API Fetch

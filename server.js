@@ -13,6 +13,7 @@ const getWeather = require('./weather.js');
 const getMovies = require('./movies.js');
 const getYelp = require('./yelp.js');
 const getLocation = require('./location.js');
+const getTrail = require('./trail.js');
 
 // PORT
 const PORT = process.env.PORT || 3000;
@@ -32,9 +33,11 @@ function errorHandler(error,request,response) {
 // API Routes
 app.get('/', getHome);
 app.get('/location', getLocation);
+app.get('/trails', getTrail);
 app.get('/weather', getWeather);
 app.get('/movies', getMovies);
 app.get('/yelp', getYelp);
+
 
 // Registered middleware
 app.use('*', notFoundHandler);

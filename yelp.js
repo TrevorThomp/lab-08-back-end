@@ -14,6 +14,7 @@ function Yelp(data) {
 
 // Yelp API Fetch
 function getYelp(request,response) {
+  console.log('In yelp')
   const url = `https://api.yelp.com/v3/businesses/search?latitude=${request.query.data.latitude}&longitude=${request.query.data.longitude}`;
 
   return superagent
@@ -25,7 +26,7 @@ function getYelp(request,response) {
       })
       response.status(200).json(yelpData);
     })
-    .catch(() => errorHandler('So sorry, something went wrong', request, response));
+    .catch(() => response.status(500).send('So sorry, something went really wrong', request, response));
 }
 
 // Export API fetch

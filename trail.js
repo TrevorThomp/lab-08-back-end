@@ -24,7 +24,6 @@ function getTrail(request,response) {
   return superagent
     .get(url)
     .then(result => {
-      console.log(result)
       const trailData = result.body.trails.map(data => {
         return new Trail(data);
       })

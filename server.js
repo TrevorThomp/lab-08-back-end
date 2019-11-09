@@ -6,7 +6,12 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const cors = require('cors');
+const pg = require('pg');
 app.use(cors());
+
+const client = new pg.Client(process.env.DATABASE_URL);
+client.connect();
+client.on('err', err => console.error(err));
 
 // Access to API modules
 const getWeather = require('./weather.js');

@@ -5,10 +5,10 @@ require('dotenv').config();
 //Dependencies and setup
 const express = require('express');
 const app = express();
-const cors = require('cors');
+// const cors = require('cors');
 const pg = require('pg');
 const superagent = require('superagent');
-app.use(cors());
+// app.use(cors());
 
 const client = new pg.Client(process.env.DATABASE_URL);
 client.on('err', err => console.error(err));

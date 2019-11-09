@@ -54,9 +54,9 @@ Actual time needed to complete: 6 hours
 
 Number and name of feature: Modularize
 
-Estimate of time needed to complete: 
+Estimate of time needed to complete: 30 minutes
 
-Start time: 
+Start time: 10:35am
 
 Finish time: 
 

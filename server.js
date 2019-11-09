@@ -13,6 +13,12 @@ app.use(cors());
 const client = new pg.Client(process.env.DATABASE_URL);
 client.on('err', err => console.error(err));
 
+app.use(function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
+
 // Access to API modules
 const getWeather = require('./weather.js');
 const getMovies = require('./movies.js');

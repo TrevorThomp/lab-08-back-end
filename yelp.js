@@ -1,7 +1,18 @@
 'use strict';
 
+// Application Dependencies
 const superagent = require('superagent');
 
+// Yelp Constructor
+function Yelp(data) {
+  this.name = data.name;
+  this.rating = data.rating;
+  this.price = data.price;
+  this.url = data.url;
+  this.image_url = data.image_url;
+}
+
+// Yelp API Fetch
 function getYelp(request,response) {
   const url = `https://api.yelp.com/v3/businesses/search?latitude=${request.query.data.latitude}&longitude=${request.query.data.longitude}`;
 
@@ -17,12 +28,5 @@ function getYelp(request,response) {
     .catch(() => errorHandler('So sorry, something went wrong', request, response));
 }
 
-function Yelp(data) {
-  this.name = data.name;
-  this.rating = data.rating;
-  this.price = data.price;
-  this.url = data.url;
-  this.image_url = data.image_url;
-}
-
+// Export API fetch
 module.exports = getYelp;

@@ -1,12 +1,15 @@
 'use strict';
 
+// Application Dependencies
 const superagent = require('superagent');
 const pg = require('pg');
 
+// Connects to PSQL
 const client = new pg.Client(process.env.DATABASE_URL);
 client.connect();
 client.on('err', err => console.error(err));
 
+// Location Constructor
 function Location(query, data){
   this.search_query = query;
   this.formatted_query = data.formatted_address;
@@ -14,10 +17,12 @@ function Location(query, data){
   this.longitude = data.geometry.location.lng;
 }
 
+// Google Geocode API Fetch
 Location.fetchLocation = function (query){
   const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${query}&key=${process.env.GEOCODE_API_KEY}`;
 
-  return superagent.get(url)
+  return superagent
+    .get(url)
     .then( result=> {
       if(!result.body.results.length) {throw 'No data';}
       let location = new Location(query, result.body.results[0]);
@@ -29,6 +34,7 @@ Location.fetchLocation = function (query){
     });
 };
 
+// Location SQL lookup
 Location.lookup = (handler) => {
   const SQL = `SELECT * FROM locations WHERE search_query=$1`;
   const values = [handler.query];
@@ -44,6 +50,7 @@ Location.lookup = (handler) => {
     .catch(console.error);
 };
 
+// Location SQL save data
 Location.prototype.save = function(){
   const SQL = `INSERT INTO locations
   (search_query, formatted_query, latitude, longitude)
@@ -54,6 +61,7 @@ Location.prototype.save = function(){
   return client.query(SQL, values);
 };
 
+// Function to query DB or fetch from API
 function getLocation(request,response) {
 
   const locationHandler = {
@@ -73,4 +81,5 @@ function getLocation(request,response) {
   Location.lookup(locationHandler);
 }
 
+// Export Location API Fetch
 module.exports = getLocation;

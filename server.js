@@ -41,6 +41,4 @@ app.use('*', notFoundHandler);
 app.use(errorHandler);
 
 // Make sure the server is listening for requests
-app.listen(PORT, '0.0.0.0', function(err) {
-  console.log(`Started listening on ${PORT}`);
-});
+app.listen(PORT, () => console.log(`app is listening ${PORT}`));

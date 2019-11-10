@@ -7,24 +7,18 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const pg = require('pg');
-const superagent = require('superagent');
-app.use(cors());
 
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  next();
-});
+app.use(cors());
 
 const client = new pg.Client(process.env.DATABASE_URL);
 client.on('err', err => console.error(err));
 
 // Access to API modules
-const getWeather = require('./weather.js');
-const getMovies = require('./movies.js');
-const getYelp = require('./yelp.js');
-const getLocation = require('./location.js');
-const getTrail = require('./trail.js');
+const getWeather = require('./data/weather.js');
+const getMovies = require('./data/movies.js');
+const getYelp = require('./data/yelp.js');
+const getLocation = require('./data/location.js');
+const getTrail = require('./data/trail.js');
 
 // PORT
 const PORT = process.env.PORT || 3000;
@@ -48,7 +42,6 @@ app.get('/trails', getTrail);
 app.get('/weather', getWeather);
 app.get('/movies', getMovies);
 app.get('/yelp', getYelp);
-
 
 // Registered middleware
 app.use('*', notFoundHandler);

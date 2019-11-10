@@ -5,19 +5,19 @@ require('dotenv').config();
 //Dependencies and setup
 const express = require('express');
 const app = express();
-// const cors = require('cors');
+const cors = require('cors');
 const pg = require('pg');
 const superagent = require('superagent');
-// app.use(cors());
+app.use(cors());
+
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
 
 const client = new pg.Client(process.env.DATABASE_URL);
 client.on('err', err => console.error(err));
-
-app.use(function(req, res, next) {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  next();
-});
 
 // Access to API modules
 const getWeather = require('./weather.js');

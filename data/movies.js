@@ -16,7 +16,7 @@ function Movies(movie) {
 
 // Movies API Fetch
 function getMovies(request,response) {
-  const url = `https://api.themoviedb.org/3/movie/now_playing?api_key=${process.env.MOVIE_API_KEY}&language=en-US&page=1`;
+  const url = `https://api.themoviedb.org/3/search/movie?api_key=${process.env.MOVIE_API_KEY}&language=en-US&page=1&include_adult=false&query=${request.query.data.search_query}`;
 
   return superagent.get(url)
     .then(result => {
